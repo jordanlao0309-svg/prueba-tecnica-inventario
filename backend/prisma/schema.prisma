@@ -1,0 +1,29 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Definimos los estados exactos que menciona el documento para mantener consistencia
+enum EstadoEquipo {
+  OPERATIVO
+  EN_MANTENIMIENTO
+  DADO_DE_BAJA
+}
+
+model Equipo {
+  id            Int          @id @default(autoincrement())
+  nombre        String       // Ej: Laptop, Monitor, Teclado
+  marca         String
+  estado        EstadoEquipo @default(OPERATIVO)
+  numeroSerie   String       @unique
+  descripcion   String?      // Campo opcional (representa el "entre otros" del PDF)
+  
+  // Campos de auditoría (buenas prácticas)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
