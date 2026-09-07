@@ -1,0 +1,109 @@
+### ===================================================================
+### PRUEBAS DE API - INVENTARIO DE EQUIPOS
+### Compatible con la extensión "REST Client" de VS Code / Cursor / Windsurf
+### ===================================================================
+
+@baseUrl = http://localhost:3000
+@equiposUrl = {{baseUrl}}/api/equipos
+
+### 1. Healthcheck / Estado del Servidor
+GET {{baseUrl}}/
+Accept: application/json
+
+### -------------------------------------------------------------------
+### 2. Listar todos los equipos
+### -------------------------------------------------------------------
+GET {{equiposUrl}}
+Accept: application/json
+
+### -------------------------------------------------------------------
+### 3. Crear Equipo 1 (Estado: OPERATIVO)
+### -------------------------------------------------------------------
+POST {{equiposUrl}}
+Content-Type: application/json
+
+{
+  "nombre": "Laptop ThinkPad T14 Gen 3",
+  "marca": "Lenovo",
+  "estado": "OPERATIVO",
+  "numeroSerie": "LNV-2024-8841",
+  "descripcion": "Equipo asignado al desarrollador frontend principal (16GB RAM, 512GB SSD)"
+}
+
+### -------------------------------------------------------------------
+### 4. Crear Equipo 2 (Estado: EN_MANTENIMIENTO)
+### -------------------------------------------------------------------
+POST {{equiposUrl}}
+Content-Type: application/json
+
+{
+  "nombre": "Monitor UltraSharp 27 pulgadas",
+  "marca": "Dell",
+  "estado": "EN_MANTENIMIENTO",
+  "numeroSerie": "DEL-2024-1092",
+  "descripcion": "Presenta parpadeo ocasional en la entrada DisplayPort"
+}
+
+### -------------------------------------------------------------------
+### 5. Crear Equipo 3 (Estado: DADO_DE_BAJA - Sin descripción opcional)
+### -------------------------------------------------------------------
+POST {{equiposUrl}}
+Content-Type: application/json
+
+{
+  "nombre": "Impresora LaserJet Pro",
+  "marca": "HP",
+  "estado": "DADO_DE_BAJA",
+  "numeroSerie": "HP-2018-0045"
+}
+
+### -------------------------------------------------------------------
+### 6. Obtener un equipo por ID (Reemplazar el '1' por el ID deseado)
+### -------------------------------------------------------------------
+GET {{equiposUrl}}/1
+Accept: application/json
+
+### -------------------------------------------------------------------
+### 7. Actualizar un equipo existente (PUT)
+### -------------------------------------------------------------------
+PUT {{equiposUrl}}/1
+Content-Type: application/json
+
+{
+  "nombre": "Laptop ThinkPad T14 Gen 3 (Upgraded)",
+  "marca": "Lenovo",
+  "estado": "OPERATIVO",
+  "descripcion": "Se amplió la memoria RAM a 32GB y se realizó mantenimiento preventivo"
+}
+
+### -------------------------------------------------------------------
+### 8. Eliminar un equipo (DELETE)
+### -------------------------------------------------------------------
+DELETE {{equiposUrl}}/1
+
+### -------------------------------------------------------------------
+### 9. Caso de Prueba: Error de Validación (Falta campo obligatorio)
+### Esperado: 400 Bad Request
+### -------------------------------------------------------------------
+POST {{equiposUrl}}
+Content-Type: application/json
+
+{
+  "marca": "Samsung",
+  "estado": "OPERATIVO"
+}
+
+### -------------------------------------------------------------------
+### 10. Caso de Prueba: Error de Duplicado (Mismo numeroSerie)
+### Esperado: 409 Conflict
+### -------------------------------------------------------------------
+POST {{equiposUrl}}
+Content-Type: application/json
+
+{
+  "nombre": "Monitor Curvo 34\"",
+  "marca": "Samsung",
+  "estado": "OPERATIVO",
+  "numeroSerie": "DEL-2024-1092",
+  "descripcion": "Intento de registro con número de serie ya existente"
+}
