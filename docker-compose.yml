@@ -1,0 +1,72 @@
+services:
+  # -----------------------------------------------------------------
+  # 1. Base de Datos PostgreSQL (Imagen oficial)
+  # -----------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: inventario_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-inventario_db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-inventario_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # -----------------------------------------------------------------
+  # 2. Backend (Node.js + Express + TypeScript + Prisma)
+  # -----------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inventario_backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: ${PORT:-3000}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-inventario_db}?schema=public
+    ports:
+      - "${PORT:-3000}:3000"
+    networks:
+      - app-network
+
+  # -----------------------------------------------------------------
+  # 3. Frontend (React + Vite + TypeScript + Nginx)
+  # -----------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api/equipos}
+    container_name: inventario_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    networks:
+      - app-network
+
+# -------------------------------------------------------------------
+# Volúmenes y Redes
+# -------------------------------------------------------------------
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
