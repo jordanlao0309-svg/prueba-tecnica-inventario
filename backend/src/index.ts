@@ -1,12 +1,9 @@
+import 'dotenv/config';
 import express, { Request, Response } from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerDocument } from './swagger';
 import equipoRoutes from './routes/equipo.routes';
-
-// Cargar variables de entorno
-dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
